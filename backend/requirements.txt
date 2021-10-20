@@ -1,0 +1,10 @@
+Django
+django-cleanup
+django-cors-headers
+django-filter
+djangorestframework
+django-phonenumber-field[phonenumbers]
+Pillow
+pyinstaller
+PyJWT
+cherrypy
