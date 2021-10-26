@@ -9,7 +9,7 @@
     "dist": "electron-builder"
   },
   "author": "Xsponse",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {},
   "devDependencies": {
     "electron": "^15.1.2",
@@ -27,7 +27,8 @@
       "category": "Utility"
     },
     "linux": {
-      "category": "Utility"
+      "category": "Utility",
+      "target": ["AppImage", "tar.gz"]
     }
   }
 }
