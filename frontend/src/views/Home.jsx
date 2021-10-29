@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button, Form, Input, Modal, List, Card, Image, message } from "antd";
 import { LockOutlined } from "@ant-design/icons";
@@ -10,6 +10,7 @@ import api from "../utility/api";
 export default function Home() {
   const [selected, setSelected] = useState(null);
   const [form] = Form.useForm();
+  const inputRef = useRef(null);
 
   const onFinish = () => {
     form.validateFields().then((values) => {
@@ -22,9 +23,20 @@ export default function Home() {
     api.get(urls.scan({ id: id })).then((response) => {
       if (response) {
         setSelected(response);
+      } else {
+        inputRef.current.focus({
+          cursor: "start",
+        });
       }
+      form.resetFields();
     });
   };
+
+  useEffect(() => {
+    inputRef.current.focus({
+      cursor: "start",
+    });
+  }, [selected]);
 
   useEffect(() => {
     onScan.attachTo(document, {
@@ -36,6 +48,7 @@ export default function Home() {
     return () => {
       onScan.detachFrom(document);
     };
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -88,7 +101,12 @@ export default function Home() {
               },
             ]}
           >
-            <Input maxLength={12} prefix={<LockOutlined />} placeholder="Id" />
+            <Input
+              ref={inputRef}
+              maxLength={12}
+              prefix={<LockOutlined />}
+              placeholder="Id"
+            />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
