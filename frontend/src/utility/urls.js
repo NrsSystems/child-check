@@ -56,6 +56,8 @@ const urls = {
       return null;
     }
   },
+  report: `${DOMAIN}/api/report/`,
+  backup: `${DOMAIN}/api/backup/`,
   login: `${DOMAIN}/api/login/`,
 };
 

@@ -8,56 +8,49 @@ import {
   DatePicker,
   Input,
   Form,
-  List,
-  Card,
-  message,
+  Radio,
 } from "antd";
-import { EyeOutlined, LogoutOutlined } from "@ant-design/icons";
+import { EyeOutlined } from "@ant-design/icons";
 
 import DynamicTable from "../components/layout/DynamicTable";
 import urls from "../utility/urls";
-import DebounceSelect from "../components/layout/DebounceSelect";
 import api from "../utility/api";
-import formatter from "../utility/formatter";
 
 const { Column } = Table;
+const { RangePicker } = DatePicker;
 
 export default function Checks(props) {
   const [selected, setSelected] = useState(null);
-  const [manual, setManual] = useState(null);
+  const [report, setReport] = useState(false);
+  const [range, setRange] = useState(false);
   const [form] = Form.useForm();
   const tableRef = useRef(null);
 
-  async function fetchUserList(name) {
-    return api.get(urls.child(null, { name: name })).then((body) =>
-      body.results.map((child) => ({
-        label: `${child.first_name} ${child.last_name}`,
-        value: child.id,
-      }))
-    );
-  }
-
-  const onFinished = () => {
-    if (typeof manual === "object" && manual !== null) {
-      setManual(null);
-    } else {
-      form.validateFields().then((values) => {
-        if (values.child) {
-          api
-            .post(urls.check(), { child: values.child[0].value })
-            .then((response) => {
-              if (response) {
-                message.success("Check In Successful");
-                form.resetFields();
-                setManual(null);
-                tableRef.current.resetTable();
-              }
-            });
-        } else {
-          message.error("Please select a Child to check in!");
+  const onFinish = () => {
+    form.validateFields().then((values) => {
+      var title;
+      if (values.date) {
+        values.date = values.date.format("YYYY-MM-DD");
+        title = values.date;
+      } else {
+        values.range[0] = values.range[0].format("YYYY-MM-DD");
+        values.range[1] = values.range[1].format("YYYY-MM-DD");
+        title = `${values.range[0]}_${values.range[1]}`;
+      }
+      api.download("POST", urls.report, values).then((response) => {
+        if (response) {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", `${title}_childcheck_report.csv`);
+          document.body.appendChild(link);
+          link.click();
+          setReport(false);
+          setRange(false);
+          form.resetFields();
         }
       });
-    }
+    });
   };
 
   return (
@@ -71,97 +64,50 @@ export default function Checks(props) {
         <Button
           type="primary"
           style={{ marginBottom: "15px", right: 0 }}
-          onClick={() => setManual(true)}
+          onClick={() => setReport(true)}
         >
-          Manual Check-In
+          Generate Report
         </Button>
         <Modal
-          title={
-            typeof manual === "object" && manual !== null
-              ? "Check-Out"
-              : "Check-In"
-          }
-          visible={manual}
-          onOk={onFinished}
+          visible={report}
           onCancel={() => {
-            setManual(null);
+            setReport(false);
+            setRange(false);
             form.resetFields();
           }}
+          onOk={onFinish}
+          title="Generate Report"
+          bodyStyle={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
-          {typeof manual === "object" && manual !== null ? (
-            <div>
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  paddingBottom: "15px",
-                }}
+          <Radio.Group
+            size="middle"
+            buttonStyle="solid"
+            value={range}
+            onChange={(val) => setRange(val.target.value)}
+          >
+            <Radio.Button value={false}>Date</Radio.Button>
+            <Radio.Button value={true}>Range</Radio.Button>
+          </Radio.Group>
+          <div style={{ height: "25px" }} />
+          <Form form={form}>
+            {range ? (
+              <Form.Item
+                name="range"
+                label="Range"
+                rules={[{ required: true }]}
               >
-                <Image
-                  style={{ width: "250px" }}
-                  src={urls.photo(manual.photo)}
-                />
-                {`${manual.first_name} ${manual.last_name}`}
-              </div>
-              <List
-                grid={{ gutter: 16, column: 2 }}
-                dataSource={manual.guardians}
-                renderItem={(item) => (
-                  <List.Item>
-                    <Card
-                      title={`${item.first_name} ${item.last_name}`}
-                      actions={[
-                        <Button
-                          onClick={() => {
-                            api
-                              .patch(urls.check(manual.check_id), {
-                                out_guardian: item.id,
-                              })
-                              .then((response) => {
-                                if (response) {
-                                  message.success("Check Out Successful");
-                                  setManual(null);
-                                  tableRef.current.updateObject(response);
-                                }
-                              });
-                          }}
-                        >
-                          Check Out
-                        </Button>,
-                      ]}
-                    >
-                      <Image
-                        style={{ width: "150px" }}
-                        src={urls.photo(item.photo)}
-                      />
-                      <div style={{ display: "flex", flexDirection: "row" }}>
-                        Phone:
-                        <div style={{ marginLeft: "15px" }}>
-                          {formatter.phoneNumber(item.phone_number)}
-                        </div>
-                      </div>
-                    </Card>
-                  </List.Item>
-                )}
-              />
-            </div>
-          ) : (
-            <Form form={form}>
-              <Form.Item name="child" label="Child">
-                <DebounceSelect
-                  mode="multiple"
-                  placeholder="Select Child"
-                  fetchOptions={fetchUserList}
-                  single
-                  style={{
-                    width: "100%",
-                  }}
-                />
+                <RangePicker />
               </Form.Item>
-            </Form>
-          )}
+            ) : (
+              <Form.Item name="date" label="Date" rules={[{ required: true }]}>
+                <DatePicker />
+              </Form.Item>
+            )}
+          </Form>
         </Modal>
       </div>
       <DynamicTable ref={tableRef} url={props.url}>
@@ -286,19 +232,6 @@ export default function Checks(props) {
                 icon={<EyeOutlined />}
                 onClick={() => setSelected(record)}
               />
-              {!record.out_time && (
-                <Button
-                  icon={<LogoutOutlined />}
-                  onClick={() =>
-                    api.get(urls.child(record.child.id)).then((response) => {
-                      if (response) {
-                        response.check_id = record.id;
-                        setManual(response);
-                      }
-                    })
-                  }
-                />
-              )}
             </Space>
           )}
         />

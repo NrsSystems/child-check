@@ -70,6 +70,26 @@ const request = (method, url, headers, data, retry = true, progress = null) => {
     });
 };
 
+const download = (method, url, headers, data) => {
+  var state = store.getState();
+  var user = state.user;
+  headers["Authorization"] = `Bearer ${user ? user.token : null}`;
+  return axios({
+    method: method,
+    url: url,
+    headers: headers,
+    withCredentials: true,
+    data: data,
+    responseType: "blob",
+  })
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      return null;
+    });
+};
+
 const jsonHeader = { "Content-Type": "application/json;charset=UTF-8" };
 
 const api = {
@@ -100,6 +120,9 @@ const api = {
   refresh: () => {
     return refresh();
   },
+  download: (method, url, data = null) => {
+    return download(method, url, jsonHeader, data)
+  }
 };
 
 export default api;

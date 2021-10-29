@@ -17,6 +17,8 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/login/', views.LoginView.as_view(), name='Login'),
     path('api/scan/', views.ScanView.as_view(), name='Scan'),
+    path('api/report/', views.ReportView.as_view(), name='Report'),
+    path('api/backup/', views.BackupView.as_view(), name='Backup'),
     re_path(r'^favicon\.ico$', favicon_view),
     re_path('', app_view),
     re_path(r'^(?:.*)/?$', app_view),

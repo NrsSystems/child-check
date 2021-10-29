@@ -55,6 +55,35 @@ export default function Admin() {
     });
   };
 
+  const backup = () => {
+    api.download("GET", urls.backup).then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${new Date().toLocaleDateString().replaceAll("/", "-")}_childcheck_backup.zip`);
+      document.body.appendChild(link);
+      link.click();
+    });
+  };
+
+  const restore = () => {
+    var input = document.createElement("input");
+    input.type = "file";
+    input.multiple = false;
+    input.accept = "application/zip"
+    input.onchange = (e) => {
+      console.log(e.target.files)
+      var data = new FormData()
+      data.append('archive', e.target.files[0])
+      api.post(urls.backup, data).then(response => {
+        if (response) {
+          message.success("Backup Restored")
+        }
+      })
+    }
+    input.click();
+  }
+
   useEffect(() => {
     api.get(urls.user(user.id)).then((response) => {
       if (response) {
@@ -133,6 +162,18 @@ export default function Admin() {
       {user.staff && (
         <>
           <h1 style={{ marginTop: "15px" }}>Admin Settings</h1>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-evenly",
+              width: "100%",
+              marginBottom: "15px",
+            }}
+          >
+            <Button type="primary" onClick={backup}>Backup</Button>
+            <Button type="primary" onClick={restore}>Restore</Button>
+          </div>
           <DynamicTable ref={tableRef} url={urls.user()}>
             <Column
               title="Name"
