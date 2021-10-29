@@ -135,7 +135,7 @@ class ScanView(APIView):
 
 
 class ReportView(APIView):
-    permission_classes = []
+    permission_classes = [permissions.IsAuthenticated, StaffMixin]
 
     def post(self, request, format=None):
         if 'date' in request.data.keys():
@@ -163,14 +163,14 @@ class ReportView(APIView):
 
 
 class BackupView(APIView):
-    permission_classes = []
+    permission_classes = [permissions.IsAuthenticated, StaffMixin]
 
     def get(self, request, format=None):
         dir = settings.APP_DATA or settings.BASE_DIR
         dir = str(dir)
         shutil.copytree(dir + '/media', dir + '/backup')
         shutil.copy(dir + '/db.sqlite3', dir + '/backup/db.sqlite3')
-        shutil.make_archive('backup', 'zip', dir + '/backup')
+        shutil.make_archive(dir + '/backup', 'zip', dir + '/backup')
         shutil.rmtree(dir + '/backup')
         file = open(dir + '/backup.zip', 'rb').read()
         response = HttpResponse(
