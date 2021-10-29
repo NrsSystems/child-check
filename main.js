@@ -1,23 +1,32 @@
-const { app, BrowserWindow } = require("electron");
+const { app, screen, BrowserWindow } = require("electron");
 const process = require("process");
-const fs = require("fs")
+const fs = require("fs");
 
 var py;
 
 function createWindow() {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: width,
+    height: height,
+    fullscreen: true,
+    kiosk: true,
   });
 
   win.loadURL("http://localhost:8000");
-  win.maximize();
+
+  win.webContents.on("did-fail-load", () => {
+    setTimeout(() => {
+      win.loadURL("http://localhost:8000");
+    }, 1000);
+  })
 }
 
 app.whenReady().then(() => {
-  var appData = app.getPath("userData")
+  var appData = app.getPath("userData");
   if (!fs.existsSync(appData + "/media")) {
-    fs.mkdirSync(appData + "/media")
+    fs.mkdirSync(appData + "/media");
   }
 
   py = require("child_process").spawn(
@@ -25,13 +34,11 @@ app.whenReady().then(() => {
     [appData]
   );
 
-  setTimeout(() => {
-    createWindow();
+  createWindow();
 
-    app.on("activate", function () {
-      if (BrowserWindow.getAllWindows().length === 0) createWindow();
-    });
-  }, 1000);
+  app.on("activate", function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
 });
 
 app.on("window-all-closed", function () {
