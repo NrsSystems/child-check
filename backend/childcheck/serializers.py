@@ -104,3 +104,8 @@ class CheckSerializer(serializers.ModelSerializer):
             'out_supervisor': UserSerializer(instance.out_supervisor).data,
         })
         return data
+
+    def validate_child(self, value):
+        if Check.objects.filter(child=value, out_time__isnull=True).exists():
+            raise serializers.ValidationError('This Child is already checked in')
+        return value
