@@ -23,12 +23,13 @@ export default function Home() {
     api.get(urls.scan({ id: id })).then((response) => {
       if (response) {
         setSelected(response);
+        form.resetFields();
       } else {
+        form.resetFields();
         inputRef.current.focus({
           cursor: "start",
         });
       }
-      form.resetFields();
     });
   };
 
