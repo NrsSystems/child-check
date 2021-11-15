@@ -115,7 +115,7 @@ export default function GuardianRegistry() {
               name="guardian_id"
               rules={[{ required: true, message: "Please input id!" }]}
             >
-              <Input maxLength={12} />
+              <Input maxLength={16} />
             </Form.Item>
             <Form.Item name="phone_number" label="Phone Number">
               <Input
@@ -327,7 +327,7 @@ export default function GuardianRegistry() {
                 style={{ marginLeft: "15px" }}
                 editable={{
                   onChange: (val) => updateField("guardian_id", val),
-                  maxLength: 12,
+                  maxLength: 16,
                 }}
               >
                 {selected.guardian_id}

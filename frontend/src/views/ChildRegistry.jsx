@@ -132,7 +132,7 @@ export default function ChildRegistry() {
               name="child_id"
               rules={[{ required: true, message: "Please input child id!" }]}
             >
-              <Input maxLength={12} />
+              <Input maxLength={16} />
             </Form.Item>
             <Form.Item
               noStyle
@@ -331,7 +331,7 @@ export default function ChildRegistry() {
                 style={{ marginLeft: "15px" }}
                 editable={{
                   onChange: (val) => updateField("child_id", val),
-                  maxLength: 12,
+                  maxLength: 16,
                 }}
               >
                 {selected.child_id}

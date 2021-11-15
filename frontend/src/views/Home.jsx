@@ -43,7 +43,7 @@ export default function Home() {
     onScan.attachTo(document, {
       suffixKeyCodes: [13],
       onScan: function (sCode, iQty) {
-        scanId(sCode.substring(0, 12));
+        scanId(sCode.substring(0, 16));
       },
     });
     return () => {
@@ -104,7 +104,7 @@ export default function Home() {
           >
             <Input
               ref={inputRef}
-              maxLength={12}
+              maxLength={16}
               prefix={<LockOutlined />}
               placeholder="Id"
             />
