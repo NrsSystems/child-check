@@ -154,7 +154,7 @@ export default function Checks(props) {
           dataIndex="date"
           key="date"
           render={(text, record) =>
-            new Date(record.date + " PDT").toLocaleDateString()
+            new Date(record.date + "T12:00:00").toLocaleDateString()
           }
           sorter={true}
           filterDropdown={({
@@ -251,7 +251,7 @@ export default function Checks(props) {
             <div style={{ display: "flex", flexDirection: "row" }}>
               Date:
               <div style={{ marginLeft: "15px" }}>
-                {new Date(selected.date + " PDT").toLocaleDateString()}
+                {new Date(selected.date + "T12:00:00").toLocaleDateString()}
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "row" }}>
