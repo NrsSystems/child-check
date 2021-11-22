@@ -20,6 +20,7 @@ export default function Home() {
   };
 
   const scanId = (id) => {
+    if (typeof id !== "string") id = id.detail;
     api.get(urls.scan({ id: id })).then((response) => {
       if (response) {
         setSelected(response);
@@ -46,8 +47,10 @@ export default function Home() {
         scanId(sCode.substring(0, 16));
       },
     });
+    document.addEventListener("submit-barcode", scanId);
     return () => {
       onScan.detachFrom(document);
+      document.removeEventListener("submit-barcode", scanId);
     };
     // eslint-disable-next-line
   }, []);

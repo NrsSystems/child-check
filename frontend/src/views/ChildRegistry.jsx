@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Table,
   Space,
@@ -88,6 +88,27 @@ export default function ChildRegistry() {
       }
     });
   };
+
+  const enterId = (event) => {
+    if (selected) {
+      updateField("child_id", event.detail);
+    } else {
+      form.setFieldsValue({ child_id: event.detail });
+    }
+  };
+
+  useEffect(() => {
+    if (selected) {
+      document.addEventListener("submit-barcode", enterId);
+    } else {
+      document.removeEventListener("submit-barcode", enterId);
+      document.addEventListener("submit-barcode", enterId);
+    }
+    return () => {
+      document.removeEventListener("submit-barcode", enterId);
+    };
+    // eslint-disable-next-line
+  }, [selected]);
 
   return (
     <div
