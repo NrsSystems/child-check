@@ -6,6 +6,7 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 import api from "../utility/api";
 import urls from "../utility/urls";
+import scanner from "../utility/scanner";
 
 export default function Login() {
   let history = useHistory();
@@ -17,26 +18,28 @@ export default function Login() {
   const [signup, setSignup] = useState(false);
   const [form] = Form.useForm();
 
-  const onFinish = (values) => {
-    if (signup) {
-      api.post(urls.login, values).then((response) => {
-        if (response) {
-          dispatch({ type: "SET_USER", user: response });
-          history.replace(from);
-        } else {
-          form.resetFields(["password"]);
-        }
-      });
-    } else {
-      api.put(urls.login, values).then((response) => {
-        if (response) {
-          dispatch({ type: "SET_USER", user: response });
-          history.replace(from);
-        } else {
-          form.resetFields(["password"]);
-        }
-      });
-    }
+  const onFinish = () => {
+    form.validateFields().then((values) => {
+      if (signup) {
+        api.post(urls.login, values).then((response) => {
+          if (response) {
+            dispatch({ type: "SET_USER", user: response });
+            history.replace(from);
+          } else {
+            form.resetFields(["password"]);
+          }
+        });
+      } else {
+        api.put(urls.login, values).then((response) => {
+          if (response) {
+            dispatch({ type: "SET_USER", user: response });
+            history.replace(from);
+          } else {
+            form.resetFields(["password"]);
+          }
+        });
+      }
+    });
   };
 
   const autoLogin = () => {
@@ -70,7 +73,7 @@ export default function Login() {
       >
         Child Check
       </div>
-      <Form form={form} style={{ padding: "25px" }} onFinish={onFinish}>
+      <Form form={form} style={{ padding: "25px" }}>
         <Form.Item
           name="email"
           label="E-mail"
@@ -154,7 +157,38 @@ export default function Login() {
           </>
         )}
         <Form.Item>
-          <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            onClick={async () => {
+              onFinish();
+              if (window.process) {
+                try {
+                  var port = await navigator.serial.requestPort({
+                    filters: [{ usbVendorId: 0x2dd6 }],
+                  });
+                  var info = port.getInfo();
+                  if (scanner.VENDOR_IDS.includes(info.usbVendorId)) {
+                    scanner.readStream(port);
+                  }
+                } catch (e) {
+                  console.log(e);
+                }
+                try {
+                  port = await navigator.serial.requestPort({
+                    filters: [{ usbVendorId: 0x0c27 }],
+                  });
+                  info = port.getInfo();
+                  if (scanner.VENDOR_IDS.includes(info.usbVendorId)) {
+                    scanner.readStream(port);
+                  }
+                } catch (e) {
+                  console.log(e);
+                }
+              }
+            }}
+            style={{ width: "100%" }}
+          >
             {signup ? "Sign Up" : "Log In"}
           </Button>
         </Form.Item>

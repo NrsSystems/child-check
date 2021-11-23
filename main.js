@@ -3,6 +3,8 @@ const process = require("process");
 const fs = require("fs");
 
 var py;
+const VENDOR_IDS = ["11734", "3111"];
+var activePorts = [];
 
 function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -12,6 +14,10 @@ function createWindow() {
     height: height,
     fullscreen: true,
     kiosk: true,
+    webPreferences: {
+      contextIsolation: false,
+      nodeIntegration: true,
+    },
   });
 
   win.loadURL("http://localhost:8000");
@@ -20,7 +26,26 @@ function createWindow() {
     setTimeout(() => {
       win.loadURL("http://localhost:8000");
     }, 1000);
-  })
+  });
+
+  win.webContents.session.on(
+    "select-serial-port",
+    (event, portList, webContents, callback) => {
+      event.preventDefault();
+      const selectedPort = portList.find((device) => {
+        return (
+          VENDOR_IDS.includes(device.vendorId) &&
+          !activePorts.includes(device.portId)
+        );
+      });
+      if (!selectedPort) {
+        callback("");
+      } else {
+        activePorts.push(selectedPort.portId);
+        callback(selectedPort.portId);
+      }
+    }
+  );
 }
 
 app.whenReady().then(() => {

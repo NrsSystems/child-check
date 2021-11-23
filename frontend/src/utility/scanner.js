@@ -29,27 +29,31 @@ const addBarcode = (text) => {
 };
 
 const readStream = async (port) => {
-  await port.open({ baudRate: 115200 });
-  const reader = port.readable.getReader();
-  var state = store.getState();
-  store.dispatch({ type: "SET_DEVICES", devices: state.devices + 1 });
   try {
-    while (true) {
-      var enc = new TextDecoder("utf-8");
-      const { value, done } = await reader.read();
-      var data = enc.decode(value);
-      addBarcode(data);
-      if (done) {
-        //pass
-        break;
+    await port.open({ baudRate: 115200 });
+    const reader = port.readable.getReader();
+    var state = store.getState();
+    store.dispatch({ type: "SET_DEVICES", devices: state.devices + 1 });
+    try {
+      while (true) {
+        var enc = new TextDecoder("utf-8");
+        const { value, done } = await reader.read();
+        var data = enc.decode(value);
+        addBarcode(data);
+        if (done) {
+          //pass
+          break;
+        }
       }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      reader.releaseLock();
+      state = store.getState();
+      store.dispatch({ type: "SET_DEVICES", devices: state.devices - 1 });
     }
-  } catch (error) {
-    console.log(error);
-  } finally {
-    reader.releaseLock();
-    state = store.getState();
-    store.dispatch({ type: "SET_DEVICES", devices: state.devices - 1 });
+  } catch (e) {
+    console.log(e);
   }
 };
 
