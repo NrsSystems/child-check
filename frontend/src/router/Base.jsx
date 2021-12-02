@@ -9,14 +9,18 @@ const { Content } = Layout;
 
 export default function Base() {
   useEffect(() => {
-    navigator.serial.getPorts().then((ports) => {
-      for (var port of ports) {
-        var info = port.getInfo();
-        if (scanner.VENDOR_IDS.includes(info.usbVendorId)) {
-          scanner.readStream(port);
+    try {
+      navigator.serial.getPorts().then((ports) => {
+        for (var port of ports) {
+          var info = port.getInfo();
+          if (scanner.VENDOR_IDS.includes(info.usbVendorId)) {
+            scanner.readStream(port);
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
   return (

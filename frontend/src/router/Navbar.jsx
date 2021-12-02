@@ -70,22 +70,26 @@ export default function Navbar(props) {
                   />
                   <Button
                     onClick={() => {
-                      navigator.serial
-                        .requestPort({
-                          filters: [
-                            { usbVendorId: 0x0c27 },
-                            { usbVendorId: 0x2dd6 },
-                          ],
-                        })
-                        .then((port) => {
-                          var info = port.getInfo();
-                          if (scanner.VENDOR_IDS.includes(info.usbVendorId)) {
-                            scanner.readStream(port);
-                          }
-                        })
-                        .catch((e) => {
-                          console.log(e);
-                        });
+                      try {
+                        navigator.serial
+                          .requestPort({
+                            filters: [
+                              { usbVendorId: 0x0c27 },
+                              { usbVendorId: 0x2dd6 },
+                            ],
+                          })
+                          .then((port) => {
+                            var info = port.getInfo();
+                            if (scanner.VENDOR_IDS.includes(info.usbVendorId)) {
+                              scanner.readStream(port);
+                            }
+                          })
+                          .catch((e) => {
+                            console.log(e);
+                          });
+                      } catch (error) {
+                        console.log(error);
+                      }
                     }}
                   >
                     Scan for Devices
