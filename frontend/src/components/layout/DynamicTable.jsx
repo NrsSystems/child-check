@@ -24,6 +24,12 @@ const DynamicTable = forwardRef((props, ref) => {
     var params = {};
     var url = new URL(props.url.href);
 
+    if (pagination.current !== 1) {
+      params["offset"] = (pagination.current - 1) * pagination.pageSize;
+    }
+
+    params["limit"] = pagination.pageSize;
+
     for (var filter of Object.keys(filters)) {
       if (filters[filter]) {
         if (filter === "date") {
